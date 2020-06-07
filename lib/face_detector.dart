@@ -1,7 +1,8 @@
 import 'dart:io';
+import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
-import 'package:flutter_ml_kit/images_and_faces.dart';
+import 'package:flutter_ml_kit/face_painter.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:firebase_ml_vision/firebase_ml_vision.dart';
 
@@ -13,6 +14,7 @@ class FaceDetector extends StatefulWidget {
 class _FaceDetectorState extends State<FaceDetector> {
   File _imageFile;
   List<Face> _faces;
+  ui.Image _image;
 
   void _getImageAndDetectFaces() async {
     final picker = ImagePicker();
@@ -30,8 +32,16 @@ class _FaceDetectorState extends State<FaceDetector> {
       setState(() {
         _imageFile = imageFile;
         _faces = faces;
+        _loadImage(imageFile);
       });
     }
+  }
+
+  _loadImage(File file) async {
+    final data = await file.readAsBytes();
+    await decodeImageFromList(data).then((value) => setState(() {
+          _image = value;
+        }));
   }
 
   @override
@@ -41,11 +51,18 @@ class _FaceDetectorState extends State<FaceDetector> {
         title: Text('Face Detector'),
       ),
       body: (_imageFile != null)
-          ? ImagesAndFaces(
-              imageFile: _imageFile,
-              faces: _faces,
+          ? Center(
+              child: FittedBox(
+                child: SizedBox(
+                  width: _image.width.toDouble(),
+                  height: _image.height.toDouble(),
+                  child: CustomPaint(
+                    painter: FacePainter(_image, _faces),
+                  ),
+                ),
+              ),
             )
-          : Container(),
+          : Center(child: Text('No image selected')),
       floatingActionButton: FloatingActionButton(
         onPressed: _getImageAndDetectFaces,
         tooltip: 'Pick an image',
