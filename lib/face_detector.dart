@@ -17,17 +17,23 @@ class _FaceDetectorState extends State<FaceDetector> {
   ui.Image _image;
 
   void _getImageAndDetectFaces() async {
+
+    //Step 1 - Image Selection
     final picker = ImagePicker();
     final pickedFile = await picker.getImage(source: ImageSource.gallery);
     final File imageFile = File(pickedFile.path);
 
+    //Step 2 - Load the selected image
     final image = FirebaseVisionImage.fromFile(imageFile);
+
+    //Step 3 - Detecting faces
     final faceDetector = FirebaseVision.instance.faceDetector(
       FaceDetectorOptions(
           mode: FaceDetectorMode.accurate, enableLandmarks: true),
     );
 
     final faces = await faceDetector.processImage(image);
+
     if (mounted) {
       setState(() {
         _imageFile = imageFile;
@@ -41,7 +47,7 @@ class _FaceDetectorState extends State<FaceDetector> {
     final data = await file.readAsBytes();
     await decodeImageFromList(data).then((value) => setState(() {
           _image = value;
-        }));
+    }));
   }
 
   @override
