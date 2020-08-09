@@ -1,34 +1,38 @@
-import 'dart:ui' as ui;
-
 import 'package:flutter/material.dart';
 import 'package:firebase_ml_vision/firebase_ml_vision.dart';
 
 class FacePainter extends CustomPainter {
-  final ui.Image image;
-  final List<Face> faces;
-  final List<Rect> rects = [];
+  FacePainter(this.absoluteImageSize, this.faces);
 
-  FacePainter(this.image, this.faces) {
-    for (var i = 0; i < faces.length; i++) {
-      rects.add(faces[i].boundingBox);
-    }
-  }
+  final Size absoluteImageSize;
+  final List<Face> faces;
 
   @override
-  void paint(ui.Canvas canvas, ui.Size size) {
+  void paint(Canvas canvas, Size size) {
+    final double scaleX = size.width / absoluteImageSize.width;
+    final double scaleY = size.height / absoluteImageSize.height;
+
     final Paint paint = Paint()
       ..style = PaintingStyle.stroke
-      ..strokeWidth = 15.0
-      ..color = Colors.yellow;
+      ..strokeWidth = 2.0
+      ..color = Colors.red;
 
-    canvas.drawImage(image, Offset.zero, Paint());
-    for (var i = 0; i < faces.length; i++) {
-      canvas.drawRect(rects[i], paint);
+    for (Face face in faces) {
+      canvas.drawRect(
+        Rect.fromLTRB(
+          face.boundingBox.left * scaleX,
+          face.boundingBox.top * scaleY,
+          face.boundingBox.right * scaleX,
+          face.boundingBox.bottom * scaleY,
+        ),
+        paint,
+      );
     }
   }
 
   @override
   bool shouldRepaint(FacePainter oldDelegate) {
-    return image != oldDelegate.image || faces != oldDelegate.faces;
+    return oldDelegate.absoluteImageSize != absoluteImageSize ||
+        oldDelegate.faces != faces;
   }
 }

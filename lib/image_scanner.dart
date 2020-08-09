@@ -1,25 +1,29 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:firebase_ml_vision/firebase_ml_vision.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_ml_kit/face_painter.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:firebase_ml_vision/firebase_ml_vision.dart';
 
-class FaceDetector extends StatefulWidget {
+class ImageScanner extends StatefulWidget {
+  ImageScanner({this.type});
+  final int type;
+
   @override
-  State<StatefulWidget> createState() => _FaceDetectorState();
+  _ImageScannerState createState() => _ImageScannerState();
 }
 
-class _FaceDetectorState extends State<FaceDetector> {
+class _ImageScannerState extends State<ImageScanner> {
   File _imageFile;
   Size _imageSize;
-
   dynamic _scanResults;
 
-  final _faceDetector = FirebaseVision.instance.faceDetector(
-    FaceDetectorOptions(mode: FaceDetectorMode.accurate, enableLandmarks: true),
-  );
+  final BarcodeDetector _barcodeDetector =
+      FirebaseVision.instance.barcodeDetector();
+  final FaceDetector _faceDetector = FirebaseVision.instance.faceDetector();
+  final ImageLabeler _imageLabeler = FirebaseVision.instance.imageLabeler();
+  final TextRecognizer _recognizer = FirebaseVision.instance.textRecognizer();
 
   Future<void> _getImage() async {
     setState(() {
@@ -69,7 +73,23 @@ class _FaceDetectorState extends State<FaceDetector> {
         FirebaseVisionImage.fromFile(imageFile);
 
     dynamic results;
-    results = await _faceDetector.processImage(visionImage);
+    switch (widget.type) {
+      case 0:
+        results = await _recognizer.processImage(visionImage);
+        break;
+      case 1:
+        results = await _barcodeDetector.detectInImage(visionImage);
+
+        break;
+      case 2:
+        results = await _imageLabeler.processImage(visionImage);
+        break;
+      case 3:
+        results = await _faceDetector.processImage(visionImage);
+        break;
+      default:
+        return;
+    }
 
     setState(() {
       _scanResults = results;
@@ -77,8 +97,27 @@ class _FaceDetectorState extends State<FaceDetector> {
   }
 
   CustomPaint _buildResults(Size imageSize, dynamic results) {
+    CustomPainter painter;
+
+    switch (widget.type) {
+      case 0:
+        painter = FacePainter(_imageSize, results);
+        break;
+      case 1:
+        painter = FacePainter(_imageSize, results);
+        break;
+      case 2:
+        painter = FacePainter(_imageSize, results);
+        break;
+      case 3:
+        painter = FacePainter(_imageSize, results);
+        break;
+      default:
+        break;
+    }
+
     return CustomPaint(
-      painter: FacePainter(_imageSize, results),
+      painter: painter,
     );
   }
 
@@ -124,7 +163,7 @@ class _FaceDetectorState extends State<FaceDetector> {
 
   @override
   void dispose() {
-    _faceDetector.close();
+    // _faceDetector.close();
     super.dispose();
   }
 }

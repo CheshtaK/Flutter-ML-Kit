@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_ml_kit/model/content.dart';
-import 'package:flutter_ml_kit/routes/routes.dart';
+import 'package:flutter_ml_kit/image_scanner.dart';
+import 'package:flutter_ml_kit/model/detector.dart';
 
 class HomePage extends StatefulWidget {
   HomePage({this.title});
@@ -16,13 +16,13 @@ class _HomePageState extends State<HomePage> {
 
   @override
   void initState() {
-    contents = getContents();
+    contents = getDetectors();
     super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
-    ListTile makeListTile(Content content) => ListTile(
+    ListTile makeListTile(Detector detector) => ListTile(
           contentPadding: EdgeInsets.symmetric(
             horizontal: 20.0,
             vertical: 10.0,
@@ -38,12 +38,12 @@ class _HomePageState extends State<HomePage> {
               ),
             ),
             child: Icon(
-              content.icon,
+              detector.icon,
               color: Colors.white,
             ),
           ),
           title: Text(
-            content.title,
+            detector.title,
             style: TextStyle(
               color: Colors.white,
               fontWeight: FontWeight.bold,
@@ -55,7 +55,11 @@ class _HomePageState extends State<HomePage> {
             size: 30.0,
           ),
           onTap: () {
-            Navigator.of(context).pushNamed(content.route);
+            Navigator.of(context).push(
+              MaterialPageRoute(
+                  builder: (BuildContext context) =>
+                      ImageScanner(type: detector.type)),
+            );
           },
         );
 
@@ -95,27 +99,4 @@ class _HomePageState extends State<HomePage> {
       ),
     );
   }
-}
-
-List getContents() {
-  return [
-    Content(
-        title: 'Text Recognizer',
-        icon: Icons.text_fields,
-        route: Routes.text_recognizer),
-    Content(
-        title: 'Barcode Detector',
-        icon: Icons.crop_free,
-        route: Routes.barcode_detector),
-    Content(
-      title: 'Image Labeler',
-      icon: Icons.image,
-      route: Routes.image_labeler,
-    ),
-    Content(
-      title: 'Face Detector',
-      icon: Icons.face,
-      route: Routes.face_detector,
-    ),
-  ];
 }
