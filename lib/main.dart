@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_ml_kit/home.dart';
+import 'package:flutter_ml_kit/screens/home.dart';
 
 void main() {
   runApp(MyApp());

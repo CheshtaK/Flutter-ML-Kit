@@ -3,11 +3,15 @@ import 'dart:io';
 
 import 'package:firebase_ml_vision/firebase_ml_vision.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_ml_kit/face_painter.dart';
+import 'package:flutter_ml_kit/detector_painters/barcode_painter.dart';
+import 'package:flutter_ml_kit/detector_painters/face_painter.dart';
+import 'package:flutter_ml_kit/detector_painters/label_painter.dart';
+import 'package:flutter_ml_kit/detector_painters/text_painter.dart';
 import 'package:image_picker/image_picker.dart';
 
 class ImageScanner extends StatefulWidget {
-  ImageScanner({this.type});
+  ImageScanner({this.title, this.type});
+  final String title;
   final int type;
 
   @override
@@ -101,13 +105,13 @@ class _ImageScannerState extends State<ImageScanner> {
 
     switch (widget.type) {
       case 0:
-        painter = FacePainter(_imageSize, results);
+        painter = TextRecognitionPainter(_imageSize, results);
         break;
       case 1:
-        painter = FacePainter(_imageSize, results);
+        painter = BarcodePainter(_imageSize, results);
         break;
       case 2:
-        painter = FacePainter(_imageSize, results);
+        painter = LabelPainter(_imageSize, results);
         break;
       case 3:
         painter = FacePainter(_imageSize, results);
@@ -135,7 +139,7 @@ class _ImageScannerState extends State<ImageScanner> {
               child: Text(
                 'Scanning...',
                 style: TextStyle(
-                  color: Colors.green,
+                  color: Colors.pink,
                   fontSize: 30.0,
                 ),
               ),
@@ -148,7 +152,7 @@ class _ImageScannerState extends State<ImageScanner> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Face Detector'),
+        title: Text(widget.title),
       ),
       body: (_imageFile != null)
           ? _buildImage()
@@ -156,6 +160,7 @@ class _ImageScannerState extends State<ImageScanner> {
       floatingActionButton: FloatingActionButton(
         onPressed: _getImage,
         tooltip: 'Pick an image',
+        backgroundColor: Color.fromRGBO(58, 66, 86, 1.0),
         child: Icon(Icons.add_a_photo),
       ),
     );
@@ -163,7 +168,10 @@ class _ImageScannerState extends State<ImageScanner> {
 
   @override
   void dispose() {
-    // _faceDetector.close();
+    _faceDetector.close();
+    _imageLabeler.close();
+    _recognizer.close();
+    _barcodeDetector.close();
     super.dispose();
   }
 }

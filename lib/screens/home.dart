@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_ml_kit/image_scanner.dart';
+import 'package:flutter_ml_kit/screens/image_scanner.dart';
 import 'package:flutter_ml_kit/model/detector.dart';
 
 class HomePage extends StatefulWidget {
@@ -58,7 +58,7 @@ class _HomePageState extends State<HomePage> {
             Navigator.of(context).push(
               MaterialPageRoute(
                   builder: (BuildContext context) =>
-                      ImageScanner(type: detector.type)),
+                      ImageScanner(title: detector.title, type: detector.type)),
             );
           },
         );
